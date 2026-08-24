@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: raw_logistics
+    database: OLIST_WEATHER_DB   # update to your actual Snowflake database name
+    schema: RAW                   # update to the schema load_to_snowflake.py writes into
+    description: >
+      Raw tables loaded directly by /scripts/load_to_snowflake.py via
+      snowflake-connector-python (cursor.executemany, parameterized, with rollback
+      on failure). No intermediate stage/S3/Snowpipe — Python writes straight
+      into these tables.
+    tables:
+      - name: raw_historical_weather_ingest
+        description: "Raw ERA5 historical weather grid data, one row per grid-cell per day."
+      - name: raw_olist_orders
+        description: "Raw Olist orders extract."
+      - name: raw_olist_order_items
+        description: "Raw Olist order line items, links order_id to seller_id."
+      - name: raw_olist_customers
+        description: "Raw Olist customers, includes zip_code_prefix (crowdsourced, not a precise geocode)."
+      - name: raw_olist_sellers
+        description: "Raw Olist sellers, includes zip_code_prefix (crowdsourced, not a precise geocode)."
+      - name: raw_olist_geolocation
+        description: "Raw Olist geolocation pings — many lat/lng rows per zip_code_prefix, intentionally undeduplicated at this layer."

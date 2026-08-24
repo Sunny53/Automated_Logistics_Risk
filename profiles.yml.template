@@ -1,0 +1,18 @@
+# TEMPLATE ONLY — this file does NOT go in your git repo.
+# Real usage: copy this to ~/.dbt/profiles.yml (outside the project folder)
+# and fill in your actual Snowflake account details.
+# Never commit a filled-in version of this file anywhere.
+
+snowflake_dw:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"       # e.g. xy12345.us-east-1
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
+      database: OLIST_WEATHER_DB
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
+      schema: RAW
+      threads: 4

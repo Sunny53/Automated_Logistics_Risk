@@ -1,0 +1,21 @@
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Credentials - NEVER commit these
+.env
+*.env
+profiles.yml
+**/credentials*.json
+**/secrets*.json
+
+# OS
+.DS_Store

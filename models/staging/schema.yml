@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: stg_olist_orders
+    description: "One row per order, light typing + is_late_delivery flag only."
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests: [not_null]
+
+  - name: stg_olist_order_items
+    description: "One row per order line item. Links orders to sellers."
+    columns:
+      - name: order_id
+        tests: [not_null]
+      - name: seller_id
+        tests: [not_null]
+
+  - name: stg_olist_customers
+    description: "One row per customer, includes destination zip_code_prefix."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: customer_zip_code_prefix
+        tests: [not_null]
+
+  - name: stg_olist_sellers
+    description: "One row per seller, includes origin zip_code_prefix."
+    columns:
+      - name: seller_id
+        tests: [unique, not_null]
+      - name: seller_zip_code_prefix
+        tests: [not_null]
+
+  - name: stg_olist_geolocation
+    description: "Many rows per zip_code_prefix (crowdsourced pings, undeduplicated)."
+    columns:
+      - name: geolocation_zip_code_prefix
+        tests: [not_null]
+
+  - name: stg_historical_weather
+    description: "One row per grid-cell per day, ERA5 reanalysis via Open-Meteo."
+    columns:
+      - name: staging_weather_id
+        tests: [unique, not_null]
+      - name: station_id
+        tests: [not_null]
+      - name: weather_date
+        tests: [not_null]

@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: geo_zip_centroid
+    description: >
+      Computes the median latitude, longitude, and geographic centroid point for each
+      Brazilian zip_code_prefix from crowdsourced geolocation pings. Outliers in raw
+      crowdsourced data are mitigated by using Snowflake's APPROX_PERCENTILE median
+      calculation rather than a simple average. Also resolves the primary state of
+      each prefix via mode, with a deterministic alphabetical tiebreak and an
+      'UNKNOWN' fallback for prefixes with no non-null state pings.
+    columns:
+      - name: zip_code_prefix
+        description: "The zip code prefix representing the geolocation area."
+        tests:
+          - unique
+          - not_null
+      - name: centroid_lat
+        description: "Median latitude across all crowdsourced pings for this prefix."
+        tests:
+          - not_null
+      - name: centroid_lng
+        description: "Median longitude across all crowdsourced pings for this prefix."
+        tests:
+          - not_null
+      - name: centroid_point
+        description: "Snowflake GEOGRAPHY point built via ST_MAKEPOINT(centroid_lng, centroid_lat)."
+        tests:
+          - not_null
+      - name: ping_count
+        description: "Number of raw geolocation records behind this centroid. Low counts flag high-variance centroids."
+        tests:
+          - not_null
+          - greater_than_zero
+      - name: state
+        description: >
+          Mode state for this zip prefix. Ties broken alphabetically. Defaults to
+          'UNKNOWN' when a prefix has no non-null state pings, so this column is
+          always populated rather than failing the build.
+        tests:
+          - not_null
+
+  - name: geo_weather_station_bridge
+    description: >
+      Bridges each zip code prefix centroid to its single closest historical weather
+      grid cell (synthetic station). Weather stations are deduplicated to unique
+      (station_id, station_point) pairs before the distance join, since the source
+      table has one row per station per day — skipping this dedup would silently
+      inflate and duplicate nearest-neighbor results. The single closest station is
+      selected via ROW_NUMBER() with a deterministic (distance_km, station_id)
+      tiebreak under QUALIFY.
+    columns:
+      - name: zip_code_prefix
+        description: "The zip code prefix representing the geographic area."
+        tests:
+          - unique
+          - not_null
+      - name: station_id
+        description: "Identifier of the closest ERA5 historical weather grid cell."
+        tests:
+          - not_null
+      - name: distance_km
+        description: "Geodesic distance in km between the zip centroid and the station, converted from Snowflake's ST_DISTANCE (meters)."
+        tests:
+          - not_null
+      - name: is_within_tolerance
+        description: >
+          True when distance_km <= 50. False flags areas where weather correlation
+          may be less reliable due to grid sparsity relative to the centroid —
+          this is a real data quality signal, not an error, and is worth reporting
+          on directly rather than hidden.
+        tests:
+          - not_null
