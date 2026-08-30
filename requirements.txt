@@ -1,0 +1,15 @@
+# NOTE: This project uses a conda environment (not plain pip/venv) due to a
+# Windows DLL loading issue with pip-installed cryptography on Python < 3.10.
+# Setup:
+#   conda create -n olist_pipeline python=3.11 -y
+#   conda activate olist_pipeline
+#   conda install -c conda-forge cryptography snowflake-connector-python -y
+#   pip install -r requirements.txt
+#
+# The two conda-forge packages below are listed for reference only —
+# installing them via pip on Windows may reproduce the DLL issue.
+snowflake-connector-python
+cryptography
+python-dotenv
+dbt-core
+dbt-snowflake
