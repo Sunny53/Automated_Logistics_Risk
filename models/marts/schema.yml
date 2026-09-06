@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: dim_customer_geography
+    description: >
+      Type 2 slowly changing dimension of customer addresses built from genuine
+      repeat-customer purchase history in Olist, not simulated or fabricated data.
+      Most customers will show only version_number = 1 because Olist captures
+      mostly one-time buyers; customers with repeat orders can have additional
+      versions when their zip code prefix, city, or state changes.
+    tests:
+      - unique:
+          column_name: "customer_unique_id || '|' || version_number::string"
+    columns:
+      - name: customer_unique_id
+        description: "Stable Olist customer identifier shared across a customer's orders."
+        tests: [not_null]
+      - name: customer_zip_code_prefix
+        description: "Customer destination zip code prefix for this address version."
+      - name: customer_city
+        description: "Customer destination city for this address version."
+      - name: customer_state
+        description: "Customer destination state for this address version."
+      - name: valid_from
+        description: "Purchase timestamp when this address version began."
+        tests: [not_null]
+      - name: valid_to
+        description: "Purchase timestamp when the next address version began, or NULL for the current version."
+      - name: is_current
+        description: "True only for the most recent address version for each customer."
+        tests: [not_null]
+      - name: version_number
+        description: "Chronological address version number for the customer, starting at 1."

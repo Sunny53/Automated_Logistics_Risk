@@ -18,4 +18,4 @@ profiles.yml
 **/secrets*.json
 
 # OS
-.DS_Store
+.DS_Storedata/

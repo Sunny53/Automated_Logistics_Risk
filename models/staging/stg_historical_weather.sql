@@ -1,9 +1,12 @@
 {{ config(materialized='view') }}
 
 -- Staging: ERA5 historical weather grid data (Open-Meteo Historical Weather API)
--- Note: station_id is a synthetic grid-cell identifier, NOT a physical weather
--- station. ERA5 is reanalysis data (model + observation blend), not raw
--- thermometer readings — this is intentional (see Part 1 discussion) and
+-- Note: station_id is a synthetic grid-cell identifier derived from hub_identifier,
+-- NOT a physical weather station. Hub identifiers are now coordinate-based (hub_lat_lon),
+-- representing rounded latitude/longitude pairs (2 decimal places, ~1.1km precision) rather
+-- than zip code prefixes. This means a single station_id may represent weather data shared
+-- by multiple zip prefixes that round to the same coordinates. ERA5 is reanalysis data
+-- (model + observation blend), not raw thermometer readings — this is intentional and
 -- documented here so nothing downstream mistakes it for station telemetry.
 
 with source as (
@@ -13,6 +16,8 @@ with source as (
 renamed as (
     select
         md5(concat(hub_identifier, '_', logistics_date::string))  as staging_weather_id,
+        -- station_id now represents a rounded-coordinate grid cell (hub_identifier) that may be
+        -- shared by multiple zip prefixes, not a single zip code prefix
         trim(hub_identifier)                                       as station_id,
         latitude::float                                            as station_lat,
         longitude::float                                           as station_lng,

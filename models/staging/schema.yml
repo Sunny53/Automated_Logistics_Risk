@@ -22,6 +22,8 @@ models:
     columns:
       - name: customer_id
         tests: [unique, not_null]
+      - name: customer_unique_id
+        tests: [not_null]
       - name: customer_zip_code_prefix
         tests: [not_null]
 
