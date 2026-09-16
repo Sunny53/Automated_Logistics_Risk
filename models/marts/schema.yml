@@ -31,3 +31,68 @@ models:
         tests: [not_null]
       - name: version_number
         description: "Chronological address version number for the customer, starting at 1."
+
+  - name: fact_delivery_weather
+    description: >
+      Fact table joining orders with destination and origin weather data,
+      grain one row per order. Enables analysis of weather conditions at
+      both the delivery destination (customer location) and shipment origin
+      (seller location) relative to order purchase and delivery dates.
+      
+      DUAL-JOIN DESIGN: The model performs two parallel weather joins on
+      the same geo_weather_station_bridge table—once on the customer's
+      zip code prefix (destination) and once on the seller's zip code
+      prefix (origin)—so that destination and origin weather can be
+      aggregated and compared independently. Weather aggregations are
+      windowed from order_purchase_timestamp to the actual or estimated
+      delivery date.
+      
+      KNOWN LIMITATIONS:
+      1. Weather ingestion is ongoing. Orders whose nearest weather station
+         has no data for the relevant date range will show NULL aggregates
+         (not zero), which is expected and will resolve as ingestion completes.
+      2. For orders with multiple sellers, only the first seller's origin
+         weather is included (selected by minimum order_item_id). This
+         keeps the grain at one row per order but means multi-seller orders
+         do not reflect all origin locations. This is a documented
+         simplification, not a data quality issue.
+    columns:
+      - name: order_id
+        description: "Unique order identifier. Grain key (one row per order)."
+        tests: [not_null, unique]
+      - name: customer_id
+        description: "Customer associated with this order."
+      - name: seller_id
+        description: "First (primary) seller for this order. For multi-seller orders, only the seller with minimum order_item_id is captured."
+      - name: order_purchase_timestamp
+        description: "Timestamp when the order was placed."
+      - name: order_delivered_customer_date
+        description: "Timestamp when the order was delivered to the customer, or NULL if not yet delivered."
+      - name: order_estimated_delivery_date
+        description: "Estimated delivery date provided at order time."
+      - name: is_late_delivery
+        description: "True if the order was delivered after the estimated delivery date, false otherwise."
+      - name: destination_station_id
+        description: "Weather station ID (synthetic grid cell) closest to the customer's zip code prefix."
+      - name: destination_distance_km
+        description: "Geodesic distance in kilometers from the customer's zip centroid to the nearest weather station."
+      - name: destination_is_within_tolerance
+        description: "True if the nearest weather station is within the 50 km QC tolerance, false otherwise."
+      - name: destination_max_precipitation_mm
+        description: "Maximum daily precipitation in millimeters at the destination during the order's delivery window (purchase date through delivered or purchase date if not yet delivered). NULL if no weather data available for the station and date range."
+      - name: destination_max_wind_speed_kmh
+        description: "Maximum daily wind speed in km/h at the destination during the order's delivery window. NULL if no weather data available."
+      - name: destination_had_severe_weather
+        description: "True if any day during the delivery window at the destination had severe weather (precipitation > 20mm OR wind speed > 40 km/h), false if no severe weather, NULL if no data."
+      - name: origin_station_id
+        description: "Weather station ID (synthetic grid cell) closest to the seller's zip code prefix."
+      - name: origin_distance_km
+        description: "Geodesic distance in kilometers from the seller's zip centroid to the nearest weather station."
+      - name: origin_is_within_tolerance
+        description: "True if the nearest weather station is within the 50 km QC tolerance, false otherwise."
+      - name: origin_max_precipitation_mm
+        description: "Maximum daily precipitation in millimeters at the origin during the order's delivery window. NULL if no weather data available for the station and date range."
+      - name: origin_max_wind_speed_kmh
+        description: "Maximum daily wind speed in km/h at the origin during the order's delivery window. NULL if no weather data available."
+      - name: origin_had_severe_weather
+        description: "True if any day during the delivery window at the origin had severe weather, false if no severe weather, NULL if no data."
