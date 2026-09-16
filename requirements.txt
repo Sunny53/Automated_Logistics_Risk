@@ -13,3 +13,6 @@ cryptography
 python-dotenv
 dbt-core
 dbt-snowflake
+pandas
+jupyter
+matplotlib
