@@ -11,16 +11,15 @@ Across 99,441 orders, the overall late-delivery rate was **7.9%**.
 
 | Weather location | No severe weather | Severe weather | Ratio |
 |---|---|---|---|
-| Destination (customer) | 5.3% late | 17.3% late | 3.3x |
-| Origin (seller) | 5.7% late | 15.2% late | 2.65x |
+| Destination (customer) | 5.3% late | 17.3% late | 3.2x |
+| Origin (seller) | 5.7% late | 16.1% late | 2.8x |
 
-*Severe weather = precipitation > 20mm or wind speed > 40 km/h on any day during the order's purchase-to-delivery window.*
+*Severe weather = precipitation > 20mm or wind speed > 40 km/h on any day during the order's purchase-to-delivery window. A small share of orders (0.3% destination, 1.0% origin) have no weather match and are excluded from these percentages.*
 
 > [!IMPORTANT]
 > This is an **observed association, not a causal claim**. It doesn't control for confounds like regional remoteness or seasonality — a natural next step would be a regression isolating weather's independent effect.
 
-> [!NOTE]
-> Figures above are provisional. Weather ingestion is ongoing (rate-limited by Open-Meteo's fair-use throttle) and will be finalized once complete — see [Status](#status).
+See [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb) for the same finding visualized, plus a look at the seasonality confound and the geocoding distance distribution.
 
 ## Architecture
 
@@ -55,7 +54,7 @@ flowchart LR
 ## Status
 
 - Staging, transform, and mart layers: built and tested against live Snowflake data.
-- Weather ingestion: in progress, resumable across sessions. Rate-limited by an undocumented Open-Meteo fair-use threshold stricter than their published limits for bulk historical requests.
+- Weather ingestion: substantially complete (10M+ rows across 12,700+ grid cells). Ingestion was stopped once coverage stabilized, given diminishing returns against Open-Meteo's rate limit — an undocumented fair-use threshold on their historical archive endpoint, stricter than their published per-minute/hour limits for bulk multi-location requests. A small number of orders (under 1%) lack a weather match; see the caveat under Key finding.
 - Built and demonstrated on a Snowflake trial account (no credit card, 30-day / $400 credit limit) — see [Setup](#setup) for reproducing locally.
 
 ## Setup
@@ -89,6 +88,10 @@ pip install -r requirements.txt
    dbt run
    dbt test
    ```
+7. Optional — open the exploratory notebook for visualized results:
+   ```bash
+   jupyter notebook notebooks/analysis.ipynb
+   ```
 
 ## Screenshots
 
@@ -118,10 +121,10 @@ Destination weather vs. late-delivery correlation:
 
 ## Known limitations
 
-- Orders whose relevant zip prefix has no weather data loaded yet show `NULL` weather aggregates, not zero or an error.
+- A small share of orders (0.3% destination, 1.0% origin) have no weather match and show `NULL` weather aggregates rather than zero, since ingestion was stopped at substantial-but-not-total coverage.
 - Multi-seller orders in `fact_delivery_weather` reflect only the first seller's origin location, to preserve one-row-per-order grain.
 - Weather is ERA5 reanalysis (model-interpolated), not raw station observations — see [Data source notes](#data-source-notes).
 
 ## Tech stack
 
-Python · Snowflake · dbt Core · Open-Meteo Historical Weather API
+Python · Snowflake · dbt Core · Open-Meteo Historical Weather API · Jupyter
