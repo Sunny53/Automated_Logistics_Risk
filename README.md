@@ -7,7 +7,7 @@ A data pipeline that joins historical Brazilian e-commerce orders (Olist, 2016â€
 
 ## Demo
 
-[![Demo video](docs/screenshots/video_thumbnail.png)](https://youtu.be/YOUR_VIDEO_ID)
+[![Demo video](docs/screenshots/video_thumbnail.png)](https://youtu.be/No_hNBfRKsI?si=TsYUkdkEI1s6zIK1)
 
 *Click to watch a walkthrough of the pipeline running end-to-end, including the key finding.*
 
