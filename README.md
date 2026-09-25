@@ -5,6 +5,12 @@ A data pipeline that joins historical Brazilian e-commerce orders (Olist, 2016â€
 > [!NOTE]
 > This is a **historical audit**, not a live simulation. Olist's data is a static extract, so rather than relabeling old orders as "live" to demo a real-time pipeline, this project pulls the actual historical weather for the same dates and measures a real, verifiable correlation.
 
+## Demo
+
+[![Demo video](docs/screenshots/video_thumbnail.png)](https://youtu.be/YOUR_VIDEO_ID)
+
+*Click to watch a walkthrough of the pipeline running end-to-end, including the key finding.*
+
 ## Key finding
 
 Across 99,441 orders, the overall late-delivery rate was **7.9%**.
@@ -113,6 +119,9 @@ pip install -r requirements.txt
 
 Destination weather vs. late-delivery correlation:
 ![Destination weather correlation](docs/screenshots/destination_weather_sc.png)
+
+Origin weather vs. late-delivery correlation:
+![Origin weather correlation](docs/screenshots/origin_weather_sc.png)
 
 `dim_customer_geography` SCD2 mart:
 ![Customer geography SCD2](docs/screenshots/dim_customer_geography_sc.png)
