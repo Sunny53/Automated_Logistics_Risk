@@ -1,4 +1,3 @@
-```markdown
 # Olist Weather-Delay Analysis
 
 Late deliveries cost trust, and weather is an obvious suspect. This project puts that hunch to the test: it joins two years of real Brazilian e-commerce orders (Olist, 2016 to 2018) with actual historical weather for those same dates and asks a simple question. When it storms, do packages show up late more often?
