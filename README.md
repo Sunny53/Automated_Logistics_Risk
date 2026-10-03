@@ -9,7 +9,7 @@ Built on **dbt Core + Snowflake**, with a proper staging → transform → mart 
 
 ## Demo
 
-[![Demo video](docs/screenshots/video_thumbnail.png)](https://youtu.be/No_hNBfRKsI?si=TsYUkdkEI1s6zIK1)
+[![Demo video](https://youtu.be/No_hNBfRKsI?si=TsYUkdkEI1s6zIK1)](https://youtu.be/No_hNBfRKsI?si=TsYUkdkEI1s6zIK1)
 
 *Click through for a walkthrough of the pipeline running end to end, including the key finding.*
 
